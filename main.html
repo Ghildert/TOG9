@@ -1,0 +1,1050 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Java Project Clipboard</title>
+    
+    <style>
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+            background-color: #f0f2f5;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            margin: 0;
+        }
+
+        .container {
+            background-color: #ffffff;
+            padding: 2.5rem;
+            border-radius: 12px;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+            text-align: center;
+            max-width: 800px;
+            width: 90%;
+        }
+
+        h1 {
+            color: #333;
+            margin-top: 0;
+        }
+
+        p {
+            color: #666;
+            margin-bottom: 2rem;
+        }
+
+        .button-grid {
+            display: grid;
+            grid-template-columns: 1fr;
+            gap: 0.75rem;
+        }
+
+        @media (min-width: 600px) {
+            .button-grid {
+                grid-template-columns: 1fr 1fr;
+            }
+        }
+        @media (min-width: 800px) {
+            .button-grid {
+                grid-template-columns: 1fr 1fr 1fr;
+            }
+        }
+
+        .copy-btn {
+            padding: 0.8rem 1.2rem;
+            font-size: 1rem;
+            font-weight: 600;
+            color: #ffffff;
+            background-color: #007bff;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: background-color 0.2s ease, transform 0.1s ease;
+        }
+
+        .copy-btn:hover {
+            background-color: #0056b3;
+        }
+
+        .copy-btn:active {
+            transform: scale(0.98);
+        }
+
+        .copy-btn.copied {
+            background-color: #28a745;
+        }
+
+        /* This CSS rule hides the code storage */
+        #code-storage {
+            display: none;
+        }
+    </style>
+</head>
+<body>
+
+    <div class="container">
+        <h1>Java Shop System</h1>
+        
+        <div class="button-grid">
+            <button class="copy-btn" data-code-id="1">User.java</button>
+            <button class="copy-btn" data-code-id="2">Product.java</button>
+            <button class="copy-btn" data-code-id="3">Main.java</button>
+            <button class="copy-btn" data-code-id="4">InputCatcher.java</button>
+            <button class="copy-btn" data-code-id="5">ProductList.java</button>
+            <button class="copy-btn" data-code-id="6">FileHandling.java</button>
+            <button class="copy-btn" data-code-id="7">ShopSystem.java</button>
+        </div>
+    </div>
+
+    <div id="code-storage">
+
+<textarea id="code-1">import java.io.*;
+import java.util.*;
+
+// User class representing a user in the system
+public class User implements Serializable {
+    private String userName;
+    private String personName;
+    private String role;
+    private CustomerData customerData;
+    private SellerData sellerData;
+
+// hi if may icchange while coding palagyan ng comment muna, thanks.
+// prob one method with 1 argument and the other is overload. Do as necessary, i can change the file handling so it complies with the user class.
+   // Constructor
+    public User(String userName, String personName, String role) {
+
+    if (userName == null || userName.isEmpty()) {
+        throw new IllegalArgumentException("Username cannot be null or empty"); 
+    }
+    if (role == null || (!role.equals("Customer") && !role.equals("Seller"))) {
+        throw new IllegalArgumentException("Role must be either 'Customer' or 'Seller'");
+    }
+        // Validate inputs
+        this.userName = userName;
+        this.personName = (personName != null) ? personName : ""; // Default to empty string if null
+        this.role = role;
+
+        if (role.equals("Customer")) {
+            this.customerData = new CustomerData();
+        } else if (role.equals("Seller")) {
+            this.sellerData = new SellerData();
+        }
+    }
+
+// Overloaded constructor with default personName
+    public User(String userName, String role) {
+        this(userName, "", role); // Default personName to empty string
+        }
+
+// Static factory methods for creating customers // no use for now :/ - earl
+    // public static User createCustomer(String userName, String personName) {
+    //     return new User(userName, "Customer", personName);
+    //     }
+        
+// Static factory methods for creating sellers // no use for now :/ - earl
+    // public static User createSeller(String userName, String personName) {
+    //     return new User(userName, "Seller", personName);
+    //     }
+
+//getter and setters
+    public String getPersonName() {
+        return personName;
+        }
+
+    public void setPersonName(String personName) {
+        this.personName = personName;
+        }
+
+    public String getUserName() {
+        return userName;
+        }
+
+    public void setUserName(String userName) {
+        this.userName = userName;
+        }
+
+    public String getRole() {
+        return role;
+        }
+
+//setter with validation
+    public void setRole(String role) {
+        if (!role.equals("Customer") && !role.equals("Seller")) {
+            throw new IllegalArgumentException("Role must be either 'Customer' or 'Seller'");
+        } // Validate role
+        
+        this.role = role;
+        if (role.equals("Customer") && this.customerData == null) {
+            this.customerData = new CustomerData();
+            this.sellerData = null; // Clear seller data if switching roles
+        } else if (role.equals("Seller") && this.sellerData == null) {
+            this.sellerData = new SellerData();
+            this.customerData = null; // Clear customer data if switching roles
+        }
+    }
+
+//getter and setters for customerData and sellerData with role checks
+    public CustomerData getCustomerData() {
+        if (!isCustomer()) {
+        throw new IllegalStateException("User is not a Customer");
+        }
+        if (this.customerData == null) {
+            this.customerData = new CustomerData();
+        }
+        return customerData;
+    }
+
+    public void setCustomerData(CustomerData customerData) {
+        this.customerData = customerData;
+        }
+
+    public SellerData getSellerData() {
+        if (!isSeller()) {
+            throw new IllegalStateException("User is not a Seller");
+        }
+        if (this.sellerData == null) {
+            this.sellerData = new SellerData();
+        }
+        return sellerData;
+    }
+
+    public void setSellerData(SellerData sellerData) {
+        this.sellerData = sellerData;
+        }
+
+//role checkers
+    public boolean isCustomer() {
+        return "Customer".equals(this.role);
+        }
+
+    public boolean isSeller() {
+        return "Seller".equals(this.role);
+        }
+
+// Inner classes for CustomerData and SellerData
+    public static class CustomerData implements Serializable {
+        private static final long serialVersionUID = 1L;
+        // Add customer-specific fields here
+        private final List<String> purchaseHistory = new ArrayList<>();
+
+        //getter and setters
+        public List<String> getPurchaseHistory() {
+            return purchaseHistory;
+            }
+    }
+
+//seller data class
+    public static class SellerData implements Serializable {
+        private static final long serialVersionUID = 1L;
+        // Add seller-specific fields here
+        private final List<String> productListings = new ArrayList<>();
+
+        //getter and setters
+        public List<String> getProductListings() {return productListings;}
+    }
+
+    @Override // toString method for debugging
+    public String toString() {
+        return String.format(
+            "User[userName=%s, personName=%s, role=%s]", 
+            userName, personName, role,
+            (customerData != null) ? ", customerData=" + customerData.getPurchaseHistory().size() : 0,
+            (sellerData != null) ? ", sellerData=" + sellerData.getProductListings().size() : 0
+        ); 
+        
+    }
+}</textarea>
+
+<textarea id="code-2">public class Product {
+    private static int nextId = 1;
+    private int productId;
+    private String productName;
+    private double productInitPrice;
+    private double productDiscount;
+    private double productFinalPrice;
+    private int productQuantity;
+    private String sellerName;
+    private boolean deleted = false;
+
+    // Constructor for NEW products (called by Seller)
+    public Product(String productName, double productInitPrice, int productQuantity, String sellerName) {
+        this.productId = nextId++;
+        this.productName = productName;
+        this.productInitPrice = productInitPrice;
+        this.productQuantity = productQuantity;
+        this.sellerName = sellerName;
+        this.productDiscount = 0.0;
+        this.productFinalPrice = productInitPrice * (1 - productDiscount);
+    }
+
+    // Constructor for LOADING products from file (called by FileHandling)
+    public Product(int productId, String productName, double productInitPrice, double productDiscount, int productQuantity, String sellerName) {
+        this.productId = productId;
+        this.productName = productName;
+        this.productInitPrice = productInitPrice;
+        this.productDiscount = productDiscount;
+        this.productFinalPrice = productInitPrice * (1 - productDiscount);
+        this.productQuantity = productQuantity;
+        this.sellerName = sellerName;
+    }
+
+    // Getters
+    public int getProductId() { return productId; }
+    public String getProductName() { return productName; }
+    public double getProductFinalPrice() { return productFinalPrice; }
+    public double getProductDiscount() { return productDiscount; }
+    public double getProductInitPrice() { return productInitPrice; }
+    public int getProductQuantity() { return productQuantity; }
+    public String getSellerName() { return sellerName; }
+    public boolean isDeleted() { return deleted; }
+
+    // Setters
+    public static void setNextId(int next) {
+        nextId = next;
+    }
+
+    public void updQty(int productQuantity) { this.productQuantity = productQuantity; }
+    public void updName(String productName) { this.productName = productName; }
+    public void updInitPrice(double productInitPrice) {
+        this.productInitPrice = productInitPrice;
+        this.productFinalPrice = productInitPrice * (1 - productDiscount);
+    }
+    public void updDiscount(double productDiscount) {
+        this.productDiscount = productDiscount;
+        this.productFinalPrice = productInitPrice * (1 - productDiscount);
+    }
+
+    public void delProduct() {
+        this.productName = null;
+        this.productInitPrice = 0.0;
+        this.sellerName = null;
+        this.productQuantity = 0;
+        this.productDiscount = 0.0;
+        this.deleted = true;
+    }
+}</textarea>
+
+<textarea id="code-3">public class Main {
+    public static void main(String[] args) {
+        ShopSystem shopsys = new ShopSystem();
+        shopsys.mainDashboard();
+    }
+}</textarea>
+
+<textarea id="code-4">import java.util.Scanner;
+
+public class InputCatcher {
+    private static final Scanner sc = new Scanner(System.in);
+
+    public static int getInt(String prompt) {
+        while (true) {
+            System.out.print(prompt);
+            try {
+                String s = sc.nextLine();
+                return Integer.parseInt(s.trim());
+            } catch (NumberFormatException e) {
+                System.out.println("Invalid input, please enter an integer.");
+            }
+        }
+    }
+
+    public static float getFloat(String prompt) {
+        while (true) {
+            System.out.print(prompt);
+            try {
+                String s = sc.nextLine();
+                return Float.parseFloat(s.trim());
+            } catch (NumberFormatException e) {
+                System.out.println("Invalid input, please enter a float.");
+            }
+        }
+    }
+
+    public static String getString(String prompt) {
+        System.out.print(prompt);
+        return sc.nextLine();
+    }
+}</textarea>
+
+<textarea id="code-5">import java.util.*; // brings in List, ArrayList, Map, etc.
+
+public class ProductList {
+    protected List<Product> products;
+
+    protected void tileFormat(Product p) {
+        System.out.println("--------------------------------------");
+        System.out.printf("| ID: %-31d |\n", p.getProductId());
+        System.out.printf("| %-36s |\n", p.getProductName());
+        if (p.getProductDiscount() > 0) {
+            System.out.printf("| Price: Php %.2f (%.0f%% off)      |\n", p.getProductFinalPrice(), p.getProductDiscount() * 100);
+            System.out.printf("| (Was Php %.2f)                   |\n", p.getProductInitPrice());
+        } else {
+            System.out.printf("| Price: Php %-24.2f |\n", p.getProductFinalPrice());
+        }
+        System.out.printf("| Stock: %-28d |\n", p.getProductQuantity());
+        System.out.printf("| Seller: %-27s |\n", p.getSellerName());
+        System.out.println("--------------------------------------");
+    }
+
+    public ProductList() { this.products = new ArrayList<>(); }
+
+    public void showAll() {
+        boolean found = false;
+        for (Product p : products) {
+            if (p.isDeleted() == false && p.getProductQuantity() > 0) { // Only show items not deleted and in stock
+                tileFormat(p);
+                found = true;
+            }
+        }
+        if (!found) {
+            System.out.println("No products available.");
+        }
+    }
+
+    public void showOne(int id) {
+        for (Product p : products) {
+            if (p.getProductId() == id) {
+                tileFormat(p);
+                return;
+            }
+        }
+    }
+}
+
+class CartList extends ProductList {
+    private List<Product> cartItems = new ArrayList<>();
+
+    public CartList(List<Product> products) {
+        this.products = products;
+    }
+    
+    public List<Product> getCartItems() {
+        return cartItems;
+    }
+    
+    public boolean isEmpty() {
+        return cartItems.isEmpty();
+    }
+    
+    public void clearCart() {
+        cartItems.clear();
+    }
+
+    public void addToCart(int id, int qty) {
+        for (Product item : cartItems) {
+            if (item.getProductId() == id) {
+                item.updQty(item.getProductQuantity() + qty);
+                return;
+            }
+        }
+        
+        for (Product p : products) {
+            if (p.getProductId() == id) {
+                Product cartItem = new Product(
+                    p.getProductId(),
+                    p.getProductName(),
+                    p.getProductInitPrice(),
+                    p.getProductDiscount(),
+                    qty,
+                    p.getSellerName()
+                );
+                cartItems.add(cartItem);
+                return;
+            }
+        }
+    }
+
+    // Override tileFormat for a cart-specific view
+    @Override
+    protected void tileFormat(Product p) {
+        System.out.println("--------------------------------------");
+        System.out.printf("| %-36s |\n", p.getProductName());
+        System.out.printf("| Qty: %-30d |\n", p.getProductQuantity()); // This is the cart quantity
+        System.out.printf("| Price: Php %-24.2f |\n", p.getProductFinalPrice());
+        System.out.printf("| Subtotal: Php %-21.2f |\n", p.getProductFinalPrice() * p.getProductQuantity());
+        System.out.println("--------------------------------------");
+    }
+
+    // Override showAll to show cartItems, not all products
+    @Override
+    public void showAll() {
+        if (cartItems.isEmpty()) {
+            System.out.println("Your cart is empty.");
+            return;
+        }
+        for (Product p : cartItems) {
+            tileFormat(p);
+        }
+    }
+}
+
+class StoreList extends ProductList {
+    public StoreList(List<Product> products) {
+        this.products = products;
+    }
+
+    public void showStore(User u) {
+        boolean found = false;
+        for (Product p : products) {
+            if (p.isDeleted() == false && p.getSellerName().equals(u.getUserName())) {
+                tileFormat(p);
+                found = true;
+            }
+        }
+        if (!found) {
+            System.out.println("You have no products listed.");
+        }
+    }
+
+    public void addProduct(Product p) { products.add(p); }
+
+    public void delProduct(int id_to_del) {
+        for (Product p : products) {
+            if (p.getProductId() == id_to_del) {
+                p.delProduct();
+            }
+        }
+    }
+}</textarea>
+
+<textarea id="code-6">import java.io.*;
+import java.util.*;
+
+public class FileHandling {
+    private final List<Product> products = new ArrayList<>();
+    private final Map<String, User> users = new HashMap<>();
+
+    public List<Product> getProducts() { return products; }
+
+    public FileHandling() {
+        dataFolders();
+    }
+
+    private void dataFolders() {
+        new File("data").mkdirs();
+    }
+
+    public Product findProductByID(int id) {
+        for (Product p : products) {
+            if (p.getProductId() == id) return p;
+        }
+        return null;
+    }
+
+    public void registerUser(String userName, String personName, String role) {
+        if (!users.containsKey(userName)) {
+            User newUser = new User(userName, personName, role);
+            users.put(userName, newUser);
+        } else {
+            User existingUser = users.get(userName);
+            existingUser.setPersonName(personName);
+            existingUser.setRole(role);
+        }
+    }
+
+    public User loginUser(String userName) {
+        return users.getOrDefault(userName, null);
+    }
+
+    public void loadAllData() {
+        products.clear();
+        users.clear();
+        
+        loadProduct();
+        loadBuyerData();
+        loadSellerData();
+    }
+
+    public void saveAllData() {
+        saveProduct();
+        saveBuyerData();
+        saveSellerData();
+    }
+
+    public void saveProduct() {
+        try (BufferedWriter writer = new BufferedWriter(new FileWriter("data/products.txt"))) {
+            for (Product p : products) {
+                writer.write(p.getProductId() + "," +
+                        p.getProductName() + "," +
+                        p.getProductInitPrice() + "," +
+                        p.getProductDiscount() + "," +
+                        p.getProductQuantity() + "," +
+                        p.getSellerName() + "," +
+                        p.isDeleted());
+                writer.newLine();
+            }
+        } catch (IOException e) {
+            e.printStackTrace(System.out);
+        }
+    }
+
+    public void loadProduct() {
+        File file = new File("data/products.txt");
+        if (!file.exists()) return;
+        
+        products.clear();
+        int maxId = 0;
+
+        try (BufferedReader reader = new BufferedReader(new FileReader(file))) {
+            String line;
+            while ((line = reader.readLine()) != null) {
+                String[] parts = line.split(",");
+                if (parts.length == 7) {
+                    int productId = Integer.parseInt(parts[0]);
+                    String productName = parts[1];
+                    double productInitPrice = Double.parseDouble(parts[2]);
+                    double productDiscount = Double.parseDouble(parts[3]);
+                    int productQuantity = Integer.parseInt(parts[4]);
+                    String sellerName = parts[5];
+                    boolean deleted = Boolean.parseBoolean(parts[6]);
+
+                    Product product = new Product(productId, productName, productInitPrice, productDiscount, productQuantity, sellerName);
+                    if (deleted) {
+                        product.delProduct();
+                    }
+                    products.add(product);
+
+                    if (productId > maxId) {
+                        maxId = productId;
+                    }
+                }
+            }
+        } catch (IOException | NumberFormatException e) {
+            System.out.println("Error loading product data. File might be corrupt.");
+            e.printStackTrace(System.out);
+        }
+        
+        Product.setNextId(maxId + 1);
+    }
+
+    public void saveBuyerData() {
+        try (BufferedWriter writer = new BufferedWriter(new FileWriter("data/buyers.txt"))) {
+            for (User user : users.values()) {
+                if (user.isCustomer()) {
+                    writer.write(user.getUserName() + "," +
+                            user.getPersonName() + "," +
+                            user.getRole());
+                    writer.newLine();
+                }
+            }
+        } catch (IOException e) {
+            e.printStackTrace(System.out);
+        }
+    }
+
+
+    public void loadBuyerData() {
+        File file = new File("data/buyers.txt");
+        if (!file.exists()) return;
+
+        try (BufferedReader reader = new BufferedReader(new FileReader(file))) {
+            String line;
+            while ((line = reader.readLine()) != null) {
+                String[] parts = line.split(",");
+                if (parts.length >= 3) {
+                    String userName = parts[0];
+                    String personName = parts[1];
+                    String role = parts[2];
+                    registerUser(userName, personName, role);
+                }
+            }
+        } catch (IOException e) {
+            e.printStackTrace(System.out);
+        }
+    }
+
+
+    public void saveSellerData() {
+        try (BufferedWriter writer = new BufferedWriter(new FileWriter("data/sellers.txt"))) {
+            for (User user : users.values()) {
+                if (user.isSeller()) {
+                    writer.write(user.getUserName() + "," + user.getPersonName() + "," + user.getRole());
+                    writer.newLine();
+                }
+            }
+        } catch (IOException e) {
+            e.printStackTrace(System.out);
+        }
+    }
+
+
+    public void loadSellerData() {
+        File file = new File("data/sellers.txt");
+        if (!file.exists()) return;
+
+        try (BufferedReader reader = new BufferedReader(new FileReader(file))) {
+            String line;
+            while ((line = reader.readLine()) != null) {
+                String[] parts = line.split(",");
+                if (parts.length >= 3) {
+                    String userName = parts[0];
+                    String personName = parts[1];
+                    String role = parts[2];
+                    registerUser(userName, personName, role);
+                }
+            }
+        } catch (IOException e) {
+            e.printStackTrace(System.out);
+        }
+    }
+}</textarea>
+
+<textarea id="code-7">/*
+ * Can't add a clear screen function because JAVA doesn't support it natively. - earl
+ */
+
+public class ShopSystem {
+    FileHandling file = new FileHandling();
+
+    public void mainDashboard() {
+        file.loadAllData();
+        int choice;
+        do {
+            System.out.println("\n=== Main Dashboard ===");
+            System.out.println("[1] Buyer Dashboard");
+            System.out.println("[2] Seller Dashboard");
+            System.out.println("[0] Exit Program");
+            choice = InputCatcher.getInt("Choice: ");
+
+            switch (choice) {
+                case 1 -> {
+                    int subChoice;
+                    System.out.println("\n=== Buyer Dashboard ===");
+                    System.out.println("[1] Register");
+                    System.out.println("[2] Login");
+                    System.out.println("[0] Go back to Main Dashboard");
+                    subChoice = InputCatcher.getInt("Choice: ");
+
+                    switch (subChoice) {
+                        case 1 -> {
+                            System.out.println("Enter your details to register");
+                            String userName = InputCatcher.getString("Username: ");
+                            String personName = InputCatcher.getString("Person Name: ");
+                            file.registerUser(userName, personName, "Customer");
+                            file.saveBuyerData();
+                            System.out.println("Registration successful! You can now login.");
+                        }
+
+                        case 2 -> {
+                            System.out.println("Enter your username to login");
+                            String userName = InputCatcher.getString("Username: ");
+                            User loggedInUser = file.loginUser(userName);
+                            if (loggedInUser != null && loggedInUser.isCustomer()) {
+                                System.out.println("Login successful! Welcome, " + loggedInUser.getPersonName());
+                                buyerDashBoard(loggedInUser);
+                            } else {
+                                System.out.println("Login failed! User not found or is not a buyer.");
+                            }
+                        }
+
+                        case 0 -> {
+                            System.out.println("Returning to Main Dashboard...");
+                            break;
+                        }
+
+                        default -> System.out.println("Invalid choice. Please try again.");
+                    }
+                }
+
+                case 2 -> {
+                    int subChoice;
+                    System.out.println("\n=== Seller Dashboard ===");
+                    System.out.println("[1] Register");
+                    System.out.println("[2] Login");
+                    System.out.println("[0] Go back to Main Dashboard");
+                    subChoice = InputCatcher.getInt("Choice: ");
+                    switch (subChoice) {
+                        case 1 -> {
+                            System.out.println("Enter your details to register");
+                            String userName = InputCatcher.getString("Username: ");
+                            String personName = InputCatcher.getString("Person Name: ");
+                            file.registerUser(userName, personName, "Seller");
+                            file.saveSellerData();
+                            System.out.println("Registration successful! You can now login.");
+                        }
+
+                        case 2 -> {
+                            System.out.println("Enter your username to login");
+                            String userName = InputCatcher.getString("Username: ");
+                            User loggedInUser = file.loginUser(userName);
+                            if (loggedInUser != null && loggedInUser.isSeller()) {
+                                System.out.println("Login successful! Welcome, " + loggedInUser.getPersonName());
+                                sellerDashBoard(loggedInUser); // Pass the whole User object
+                            } else {
+                                System.out.println("Login failed! User not found or is not a seller.");
+                            }
+                        }
+
+                        case 0 -> {
+                            System.out.println("Returning to Main Dashboard...");
+                            break;
+                        }
+
+                        default -> System.out.println("Invalid choice. Please try again.");
+                    }
+                }
+            }
+        } while (choice != 0);
+
+        file.saveAllData();
+        System.out.println("Exiting program. Goodbye!");
+    }
+
+
+    public void sellerDashBoard(User seller) {
+        StoreList storeList = new StoreList(file.getProducts());
+        int choice;
+        do {
+            System.out.println("\n=== Seller Dashboard for " + seller.getPersonName() + " ===");
+            System.out.println("[1] Add Product");
+            System.out.println("[2] Update product name");
+            System.out.println("[3] Update product price");
+            System.out.println("[4] Update product stock");
+            System.out.println("[5] Remove item");
+            System.out.println("[8] View My Products");
+            System.out.println("[9] Go Back to Main Dashboard");
+            System.out.println("[0] Exit Program");
+            choice = InputCatcher.getInt("Choice: ");
+
+            switch (choice) {
+                case 1 -> {
+                    System.out.println("Enter new product details:");
+                    String name = InputCatcher.getString("Product Name: ");
+                    double price = InputCatcher.getFloat("Product Price: ");
+                    int stock = InputCatcher.getInt("Product Stock: ");
+                    Product newProduct = new Product(name, price, stock, seller.getUserName());
+                    storeList.addProduct(newProduct);
+                    file.saveProduct(); // Save changes
+                    System.out.println("Product added successfully! ID: " + newProduct.getProductId());
+                }
+
+                case 2 -> {
+                    storeList.showStore(seller);
+                    int id = InputCatcher.getInt("Enter Product ID to update name: ");
+                    Product p = file.findProductByID(id);
+                    if (p != null && p.getSellerName().equals(seller.getUserName()) && !p.isDeleted()) {
+                        String newName = InputCatcher.getString("Enter new name: ");
+                        p.updName(newName);
+                        file.saveProduct();
+                        System.out.println("Product name updated.");
+                    } else {
+                        System.out.println("Invalid ID or product does not belong to you.");
+                    }
+                }
+
+                case 3 -> {
+                    storeList.showStore(seller);
+                    int id = InputCatcher.getInt("Enter Product ID to update price: ");
+                    Product p = file.findProductByID(id);
+                    if (p != null && p.getSellerName().equals(seller.getUserName()) && !p.isDeleted()) {
+                        float newPrice = InputCatcher.getFloat("Enter new price: ");
+                        p.updInitPrice(newPrice);
+                        file.saveProduct();
+                        System.out.println("Product price updated.");
+                    } else {
+                        System.out.println("Invalid ID or product does not belong to you.");
+                    }
+                }
+
+                case 4 -> {
+                    storeList.showStore(seller);
+                    int id = InputCatcher.getInt("Enter Product ID to update stock: ");
+                    Product p = file.findProductByID(id);
+                    if (p != null && p.getSellerName().equals(seller.getUserName()) && !p.isDeleted()) {
+                        int newStock = InputCatcher.getInt("Enter new stock: ");
+                        p.updQty(newStock);
+                        file.saveProduct();
+                        System.out.println("Product stock updated.");
+                    } else {
+                        System.out.println("Invalid ID or product does not belong to you.");
+                    }
+                }
+
+                case 5 -> {
+                    storeList.showStore(seller);
+                    int id = InputCatcher.getInt("Enter Product ID to remove: ");
+                    Product p = file.findProductByID(id);
+                    if (p != null && p.getSellerName().equals(seller.getUserName()) && !p.isDeleted()) {
+                        p.delProduct();
+                        file.saveProduct();
+                        System.out.println("Product removed.");
+                    } else {
+                        System.out.println("Invalid ID or product does not belong to you.");
+                    }
+                }
+                
+                case 8 -> {
+                    System.out.println("\n--- Your Products ---");
+                    storeList.showStore(seller);
+                }
+
+                case 9 -> {
+                    System.out.println("Returning to main dashboard...");
+                    return;
+                }
+
+                case 0 -> {
+                    System.out.println("Exiting program. Goodbye!");
+                    file.saveAllData();
+                    System.exit(0);
+                }
+
+                default -> System.out.println("Invalid choice. Please try again.");
+            }
+        } while (true);
+    }
+
+    public void buyerDashBoard(User buyer) {
+        ProductList allProducts = new ProductList();
+        allProducts.products = file.getProducts();
+        CartList myCart = new CartList(file.getProducts());
+        int choice;
+        do {
+            System.out.println("\n=== Buyer Dashboard for " + buyer.getPersonName() + " ===");
+            System.out.println("[1] View All Products & Buy");
+            System.out.println("[2] View Cart & Checkout");
+            System.out.println("[9] Go Back to Main Dashboard");
+            System.out.println("[0] Exit Program");
+            choice = InputCatcher.getInt("Choice: ");
+
+            switch (choice) {
+                case 1 -> {
+                    System.out.println("\n--- All Products ---");
+                    allProducts.showAll();
+                    String buyChoice = InputCatcher.getString("Enter Product ID to buy (or 'M' to return to menu): ");
+                    if (buyChoice.equalsIgnoreCase("M")) {
+                        break;
+                    }
+                    try {
+                        int id = Integer.parseInt(buyChoice);
+                        Product p = file.findProductByID(id);
+                        if (p != null && !p.isDeleted()) {
+                            int qty = InputCatcher.getInt("Enter quantity: ");
+                            if (qty > 0 && qty <= p.getProductQuantity()) {
+                                myCart.addToCart(id, qty);
+                                System.out.println(p.getProductName() + " added to cart.");
+                            } else {
+                                System.out.println("Invalid quantity or not enough stock.");
+                            }
+                        } else {
+                            System.out.println("Invalid Product ID.");
+                        }
+                    } catch (NumberFormatException e) {
+                        System.out.println("Invalid input.");
+                    }
+                }
+
+                case 2 -> {
+                    System.out.println("\n--- Your Cart ---");
+                    myCart.showAll();
+                    if (myCart.isEmpty()) {
+                        break;
+                    }
+                    
+                    double total = 0;
+                    for (Product p : myCart.getCartItems()) {
+                        total += p.getProductFinalPrice() * p.getProductQuantity();
+                    }
+                    System.out.printf("Total Price: Php %.2f\n", total);
+                    
+                    String checkoutChoice = InputCatcher.getString("Proceed to checkout? (y/n): ");
+                    if (checkoutChoice.equalsIgnoreCase("y")) {
+                        boolean stockError = false;
+                        //check if all items are still in stock
+                        for (Product p_cart : myCart.getCartItems()) {
+                            Product p_store = file.findProductByID(p_cart.getProductId());
+                            if (p_store == null || p_store.isDeleted() || p_cart.getProductQuantity() > p_store.getProductQuantity()) {
+                                System.out.println("Error: " + p_cart.getProductName() + " is no longer available in this quantity.");
+                                stockError = true;
+                            }
+                        }
+
+                        if (!stockError) {
+                            // If all items are in stock, proceed with purchase
+                            for (Product p_cart : myCart.getCartItems()) {
+                                Product p_store = file.findProductByID(p_cart.getProductId());
+                                int newStock = p_store.getProductQuantity() - p_cart.getProductQuantity();
+                                p_store.updQty(newStock);
+                            }
+                            file.saveProduct();
+                            myCart.clearCart();
+                            System.out.println("Checkout successful! Thank you for your purchase.");
+                        } else {
+                            System.out.println("Checkout failed. Please review your cart.");
+                        }
+                    }
+                }
+
+                case 9 -> {
+                    System.out.println("Returning to main dashboard...");
+                    return;
+                }
+
+                case 0 -> {
+                    System.out.println("Exiting program. Goodbye!");
+                    file.saveAllData(); // MUST DON'T REMOVE!!
+                    System.exit(0);
+                }
+
+                default -> System.out.println("Invalid choice. Please try again.");
+            }
+        } while (true);
+    }
+}</textarea>
+
+    </div>
+
+
+    <script>
+        // --- Logic to make the buttons work ---
+
+        // 1. Get all the buttons
+        const copyButtons = document.querySelectorAll('.copy-btn');
+
+        // 2. Add a click event listener to each button
+        copyButtons.forEach(button => {
+            button.addEventListener('click', () => {
+                // Get the ID from the button's 'data-code-id' attribute
+                const codeId = button.dataset.codeId;
+                
+                // Find the matching textarea by its ID (e.g., "code-1")
+                const codeTextarea = document.getElementById('code-' + codeId);
+
+                if (codeTextarea) {
+                    // Get the raw text value from the textarea
+                    const codeToCopy = codeTextarea.value;
+
+                    // Use the Clipboard API to copy the text
+                    navigator.clipboard.writeText(codeToCopy)
+                        .then(() => {
+                            // --- Give user feedback ---
+                            const originalText = button.textContent;
+                            button.textContent = 'Copied!';
+                            button.classList.add('copied');
+
+                            // Change it back after 2 seconds
+                            setTimeout(() => {
+                                button.textContent = originalText;
+                                button.classList.remove('copied');
+                            }, 2000);
+                        })
+                        .catch(err => {
+                            console.error('Failed to copy text: ', err);
+                            button.textContent = 'Copy Failed!';
+                            setTimeout(() => {
+                                button.textContent = originalText;
+                            }, 2000);
+                        });
+                } else {
+                    console.error('Could not find code textarea for ID: ' + codeId);
+                }
+            });
+        });
+    </script>
+
+</body>
+</html>
