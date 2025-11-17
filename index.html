@@ -14,6 +14,7 @@
             align-items: center;
             min-height: 100vh;
             margin: 0;
+            padding: 2rem 0;
         }
 
         .container {
@@ -87,6 +88,7 @@
 
     <div class="container">
         <h1>Java Shop System</h1>
+        <p>Click a button to copy the contents of the file to your clipboard.</p>
         
         <div class="button-grid">
             <button class="copy-btn" data-code-id="1">User.java</button>
@@ -101,166 +103,131 @@
 
     <div id="code-storage">
 
-<textarea id="code-1">import java.io.*;
+        <textarea id="code-1">
+import java.io.*;
 import java.util.*;
 
-// User class representing a user in the system
 public class User implements Serializable {
     private String userName;
     private String personName;
-    private String role;
     private CustomerData customerData;
     private SellerData sellerData;
 
-// hi if may icchange while coding palagyan ng comment muna, thanks.
-// prob one method with 1 argument and the other is overload. Do as necessary, i can change the file handling so it complies with the user class.
-   // Constructor
-    public User(String userName, String personName, String role) {
-
-    if (userName == null || userName.isEmpty()) {
-        throw new IllegalArgumentException("Username cannot be null or empty"); 
-    }
-    if (role == null || (!role.equals("Customer") && !role.equals("Seller"))) {
-        throw new IllegalArgumentException("Role must be either 'Customer' or 'Seller'");
-    }
-        // Validate inputs
+    public User(String userName, String personName) {
+        if (userName == null || userName.isEmpty()) {
+            throw new IllegalArgumentException("Username cannot be null or empty");
+        }
         this.userName = userName;
-        this.personName = (personName != null) ? personName : ""; // Default to empty string if null
-        this.role = role;
+        this.personName = (personName != null) ? personName : "";
+        this.customerData = null; 
+        this.sellerData = null;
+    }
 
-        if (role.equals("Customer")) {
+    public void enableCustomerRole() {
+        if (this.customerData == null) {
             this.customerData = new CustomerData();
-        } else if (role.equals("Seller")) {
+        }
+    }
+    
+    public void enableSellerRole() {
+        if (this.sellerData == null) {
             this.sellerData = new SellerData();
         }
     }
 
-// Overloaded constructor with default personName
-    public User(String userName, String role) {
-        this(userName, "", role); // Default personName to empty string
-        }
+    public boolean isCustomer() {
+        return this.customerData != null;
+    }
 
-// Static factory methods for creating customers // no use for now :/ - earl
-    // public static User createCustomer(String userName, String personName) {
-    //     return new User(userName, "Customer", personName);
-    //     }
-        
-// Static factory methods for creating sellers // no use for now :/ - earl
-    // public static User createSeller(String userName, String personName) {
-    //     return new User(userName, "Seller", personName);
-    //     }
+    public boolean isSeller() {
+        return this.sellerData != null;
+    }
 
-//getter and setters
     public String getPersonName() {
         return personName;
-        }
+    }
 
     public void setPersonName(String personName) {
         this.personName = personName;
-        }
+    }
 
     public String getUserName() {
         return userName;
-        }
+    }
 
     public void setUserName(String userName) {
         this.userName = userName;
-        }
-
-    public String getRole() {
-        return role;
-        }
-
-//setter with validation
-    public void setRole(String role) {
-        if (!role.equals("Customer") && !role.equals("Seller")) {
-            throw new IllegalArgumentException("Role must be either 'Customer' or 'Seller'");
-        } // Validate role
-        
-        this.role = role;
-        if (role.equals("Customer") && this.customerData == null) {
-            this.customerData = new CustomerData();
-            this.sellerData = null; // Clear seller data if switching roles
-        } else if (role.equals("Seller") && this.sellerData == null) {
-            this.sellerData = new SellerData();
-            this.customerData = null; // Clear customer data if switching roles
-        }
     }
-
-//getter and setters for customerData and sellerData with role checks
+    
     public CustomerData getCustomerData() {
         if (!isCustomer()) {
-        throw new IllegalStateException("User is not a Customer");
-        }
-        if (this.customerData == null) {
-            this.customerData = new CustomerData();
+            throw new IllegalStateException("User is not a Customer");
         }
         return customerData;
     }
 
     public void setCustomerData(CustomerData customerData) {
         this.customerData = customerData;
-        }
+    }
 
     public SellerData getSellerData() {
         if (!isSeller()) {
             throw new IllegalStateException("User is not a Seller");
-        }
-        if (this.sellerData == null) {
-            this.sellerData = new SellerData();
         }
         return sellerData;
     }
 
     public void setSellerData(SellerData sellerData) {
         this.sellerData = sellerData;
-        }
-
-//role checkers
-    public boolean isCustomer() {
-        return "Customer".equals(this.role);
-        }
-
-    public boolean isSeller() {
-        return "Seller".equals(this.role);
-        }
-
-// Inner classes for CustomerData and SellerData
-    public static class CustomerData implements Serializable {
-        private static final long serialVersionUID = 1L;
-        // Add customer-specific fields here
-        private final List<String> purchaseHistory = new ArrayList<>();
-
-        //getter and setters
-        public List<String> getPurchaseHistory() {
-            return purchaseHistory;
-            }
     }
 
-//seller data class
+    public static class CustomerData implements Serializable {
+        private static final long serialVersionUID = 1L;
+        private final List<String> purchaseHistory = new ArrayList<>();
+        private final Map<Integer, Integer> cart = new HashMap<>();
+
+        public List<String> getPurchaseHistory() {
+            return purchaseHistory;
+        }
+        
+        public Map<Integer, Integer> getCart() {
+            return cart;
+        }
+
+        public void addToCart(int productId, int quantity) {
+            if (quantity <= 0) {
+                cart.remove(productId);
+            } else {
+                cart.put(productId, quantity);
+            }
+        }
+
+        public void clearCart() {
+            cart.clear();
+        }
+    }
+
     public static class SellerData implements Serializable {
         private static final long serialVersionUID = 1L;
-        // Add seller-specific fields here
         private final List<String> productListings = new ArrayList<>();
 
-        //getter and setters
         public List<String> getProductListings() {return productListings;}
     }
 
-    @Override // toString method for debugging
+    @Override
     public String toString() {
         return String.format(
-            "User[userName=%s, personName=%s, role=%s]", 
-            userName, personName, role,
-            (customerData != null) ? ", customerData=" + customerData.getPurchaseHistory().size() : 0,
-            (sellerData != null) ? ", sellerData=" + sellerData.getProductListings().size() : 0
-        ); 
-        
+                "User[userName=%s, personName=%s, isCustomer=%b, isSeller=%b]",
+                userName, personName, isCustomer(), isSeller()
+        );
     }
-}</textarea>
-
-<textarea id="code-2">public class Product {
+}
+        </textarea>
+        
+        <textarea id="code-2">
+public class Product {
     private static int nextId = 1;
+
     private int productId;
     private String productName;
     private double productInitPrice;
@@ -270,7 +237,6 @@ public class User implements Serializable {
     private String sellerName;
     private boolean deleted = false;
 
-    // Constructor for NEW products (called by Seller)
     public Product(String productName, double productInitPrice, int productQuantity, String sellerName) {
         this.productId = nextId++;
         this.productName = productName;
@@ -281,7 +247,6 @@ public class User implements Serializable {
         this.productFinalPrice = productInitPrice * (1 - productDiscount);
     }
 
-    // Constructor for LOADING products from file (called by FileHandling)
     public Product(int productId, String productName, double productInitPrice, double productDiscount, int productQuantity, String sellerName) {
         this.productId = productId;
         this.productName = productName;
@@ -292,7 +257,6 @@ public class User implements Serializable {
         this.sellerName = sellerName;
     }
 
-    // Getters
     public int getProductId() { return productId; }
     public String getProductName() { return productName; }
     public double getProductFinalPrice() { return productFinalPrice; }
@@ -300,19 +264,21 @@ public class User implements Serializable {
     public double getProductInitPrice() { return productInitPrice; }
     public int getProductQuantity() { return productQuantity; }
     public String getSellerName() { return sellerName; }
-    public boolean isDeleted() { return deleted; }
+    public boolean isDeleted() { return deleted; } 
 
-    // Setters
-    public static void setNextId(int next) {
+    public static void setNextId(int next) { 
         nextId = next;
     }
 
     public void updQty(int productQuantity) { this.productQuantity = productQuantity; }
+
     public void updName(String productName) { this.productName = productName; }
+
     public void updInitPrice(double productInitPrice) {
         this.productInitPrice = productInitPrice;
         this.productFinalPrice = productInitPrice * (1 - productDiscount);
     }
+
     public void updDiscount(double productDiscount) {
         this.productDiscount = productDiscount;
         this.productFinalPrice = productInitPrice * (1 - productDiscount);
@@ -326,16 +292,20 @@ public class User implements Serializable {
         this.productDiscount = 0.0;
         this.deleted = true;
     }
-}</textarea>
-
-<textarea id="code-3">public class Main {
+}
+        </textarea>
+        
+        <textarea id="code-3">
+public class Main {
     public static void main(String[] args) {
         ShopSystem shopsys = new ShopSystem();
         shopsys.mainDashboard();
     }
-}</textarea>
-
-<textarea id="code-4">import java.util.Scanner;
+}
+        </textarea>
+        
+        <textarea id="code-4">
+import java.util.Scanner;
 
 public class InputCatcher {
     private static final Scanner sc = new Scanner(System.in);
@@ -368,9 +338,11 @@ public class InputCatcher {
         System.out.print(prompt);
         return sc.nextLine();
     }
-}</textarea>
-
-<textarea id="code-5">import java.util.*; // brings in List, ArrayList, Map, etc.
+}
+        </textarea>
+        
+        <textarea id="code-5">
+import java.util.*;
 
 public class ProductList {
     protected List<Product> products;
@@ -379,23 +351,25 @@ public class ProductList {
         System.out.println("--------------------------------------");
         System.out.printf("| ID: %-31d |\n", p.getProductId());
         System.out.printf("| %-36s |\n", p.getProductName());
+        
         if (p.getProductDiscount() > 0) {
             System.out.printf("| Price: Php %.2f (%.0f%% off)      |\n", p.getProductFinalPrice(), p.getProductDiscount() * 100);
             System.out.printf("| (Was Php %.2f)                   |\n", p.getProductInitPrice());
         } else {
             System.out.printf("| Price: Php %-24.2f |\n", p.getProductFinalPrice());
         }
+        
         System.out.printf("| Stock: %-28d |\n", p.getProductQuantity());
         System.out.printf("| Seller: %-27s |\n", p.getSellerName());
         System.out.println("--------------------------------------");
     }
 
-    public ProductList() { this.products = new ArrayList<>(); }
+    public ProductList() { this.products = new ArrayList<>(); } 
 
     public void showAll() {
         boolean found = false;
         for (Product p : products) {
-            if (p.isDeleted() == false && p.getProductQuantity() > 0) { // Only show items not deleted and in stock
+            if (p.isDeleted() == false && p.getProductQuantity() > 0) {
                 tileFormat(p);
                 found = true;
             }
@@ -422,15 +396,15 @@ class CartList extends ProductList {
         this.products = products;
     }
     
-    public List<Product> getCartItems() {
+    public List<Product> getCartItems() { 
         return cartItems;
     }
     
-    public boolean isEmpty() {
+    public boolean isEmpty() { 
         return cartItems.isEmpty();
     }
     
-    public void clearCart() {
+    public void clearCart() { 
         cartItems.clear();
     }
 
@@ -447,7 +421,8 @@ class CartList extends ProductList {
                 Product cartItem = new Product(
                     p.getProductId(),
                     p.getProductName(),
-                    p.getProductInitPrice(),
+                    
+                    p.getProductInitPrice(), 
                     p.getProductDiscount(),
                     qty,
                     p.getSellerName()
@@ -458,18 +433,16 @@ class CartList extends ProductList {
         }
     }
 
-    // Override tileFormat for a cart-specific view
     @Override
     protected void tileFormat(Product p) {
         System.out.println("--------------------------------------");
         System.out.printf("| %-36s |\n", p.getProductName());
-        System.out.printf("| Qty: %-30d |\n", p.getProductQuantity()); // This is the cart quantity
+        System.out.printf("| Qty: %-30d |\n", p.getProductQuantity()); 
         System.out.printf("| Price: Php %-24.2f |\n", p.getProductFinalPrice());
         System.out.printf("| Subtotal: Php %-21.2f |\n", p.getProductFinalPrice() * p.getProductQuantity());
         System.out.println("--------------------------------------");
     }
 
-    // Override showAll to show cartItems, not all products
     @Override
     public void showAll() {
         if (cartItems.isEmpty()) {
@@ -509,9 +482,11 @@ class StoreList extends ProductList {
             }
         }
     }
-}</textarea>
-
-<textarea id="code-6">import java.io.*;
+}
+        </textarea>
+        
+        <textarea id="code-6">
+import java.io.*;
 import java.util.*;
 
 public class FileHandling {
@@ -536,13 +511,20 @@ public class FileHandling {
     }
 
     public void registerUser(String userName, String personName, String role) {
-        if (!users.containsKey(userName)) {
-            User newUser = new User(userName, personName, role);
-            users.put(userName, newUser);
+        User user = users.get(userName); 
+        if (user == null) {
+            user = new User(userName, personName);
+            users.put(userName, user);
         } else {
-            User existingUser = users.get(userName);
-            existingUser.setPersonName(personName);
-            existingUser.setRole(role);
+            
+            user.setPersonName(personName);
+        }
+        
+        
+        if (role.equals("Customer")) {
+            user.enableCustomerRole();
+        } else if (role.equals("Seller")) {
+            user.enableSellerRole();
         }
     }
 
@@ -550,22 +532,24 @@ public class FileHandling {
         return users.getOrDefault(userName, null);
     }
 
-    public void loadAllData() {
+    public void loadAllData() {  
         products.clear();
         users.clear();
         
         loadProduct();
         loadBuyerData();
         loadSellerData();
+        loadCartData(); 
     }
 
-    public void saveAllData() {
+    public void saveAllData() { 
         saveProduct();
         saveBuyerData();
         saveSellerData();
+        saveCartData(); 
     }
 
-    public void saveProduct() {
+    public void saveProduct() { 
         try (BufferedWriter writer = new BufferedWriter(new FileWriter("data/products.txt"))) {
             for (Product p : products) {
                 writer.write(p.getProductId() + "," +
@@ -582,7 +566,7 @@ public class FileHandling {
         }
     }
 
-    public void loadProduct() {
+    public void loadProduct() { 
         File file = new File("data/products.txt");
         if (!file.exists()) return;
         
@@ -621,13 +605,13 @@ public class FileHandling {
         Product.setNextId(maxId + 1);
     }
 
-    public void saveBuyerData() {
+    public void saveBuyerData() { 
         try (BufferedWriter writer = new BufferedWriter(new FileWriter("data/buyers.txt"))) {
             for (User user : users.values()) {
                 if (user.isCustomer()) {
                     writer.write(user.getUserName() + "," +
                             user.getPersonName() + "," +
-                            user.getRole());
+                            "Customer");
                     writer.newLine();
                 }
             }
@@ -637,7 +621,7 @@ public class FileHandling {
     }
 
 
-    public void loadBuyerData() {
+    public void loadBuyerData() { 
         File file = new File("data/buyers.txt");
         if (!file.exists()) return;
 
@@ -657,12 +641,13 @@ public class FileHandling {
         }
     }
 
-
-    public void saveSellerData() {
+    public void saveSellerData() { 
         try (BufferedWriter writer = new BufferedWriter(new FileWriter("data/sellers.txt"))) {
             for (User user : users.values()) {
                 if (user.isSeller()) {
-                    writer.write(user.getUserName() + "," + user.getPersonName() + "," + user.getRole());
+                    writer.write(user.getUserName() + "," +
+                            user.getPersonName() + "," +
+                            "Seller");
                     writer.newLine();
                 }
             }
@@ -691,11 +676,60 @@ public class FileHandling {
             e.printStackTrace(System.out);
         }
     }
-}</textarea>
 
-<textarea id="code-7">/*
- * Can't add a clear screen function because JAVA doesn't support it natively. - earl
- */
+    public void saveCartData() { 
+        try (BufferedWriter writer = new BufferedWriter(new FileWriter("data/carts.txt"))) {
+            for (User user : users.values()) {
+                if (user.isCustomer()) {
+                    Map<Integer, Integer> cart = user.getCustomerData().getCart();
+                    for (Map.Entry<Integer, Integer> entry : cart.entrySet()) {
+                        writer.write(user.getUserName() + "," +
+                                entry.getKey() + "," +
+                                entry.getValue());
+                        writer.newLine();
+                    }
+                }
+            }
+        } catch (IOException e) {
+            e.printStackTrace(System.out);
+        }
+    }
+
+    public void loadCartData() { 
+        File file = new File("data/carts.txt");
+        if (!file.exists()) return; 
+
+        try (BufferedReader reader = new BufferedReader(new FileReader(file))) {
+            String line;
+            while ((line = reader.readLine()) != null) {
+                String[] parts = line.split(",");
+                if (parts.length == 3) {
+                    String userName = parts[0];
+                    int productId = Integer.parseInt(parts[1]);
+                    int quantity = Integer.parseInt(parts[2]);
+
+                    User user = users.get(userName);
+                    
+                    if (user != null && user.isCustomer()) {
+                        Product p = findProductByID(productId);
+                        if (p != null && !p.isDeleted()) {
+                            user.getCustomerData().addToCart(productId, quantity);
+                        }
+                    }
+                }
+            }
+        } catch (IOException | NumberFormatException e) {
+            System.out.println("Error loading cart data. File might be corrupt.");
+            e.printStackTrace(System.out);
+        }
+    }
+}
+        </textarea>
+        
+        <textarea id="code-7">
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Map;
 
 public class ShopSystem {
     FileHandling file = new FileHandling();
@@ -711,7 +745,7 @@ public class ShopSystem {
             choice = InputCatcher.getInt("Choice: ");
 
             switch (choice) {
-                case 1 -> {
+                case 1 -> { 
                     int subChoice;
                     System.out.println("\n=== Buyer Dashboard ===");
                     System.out.println("[1] Register");
@@ -720,28 +754,30 @@ public class ShopSystem {
                     subChoice = InputCatcher.getInt("Choice: ");
 
                     switch (subChoice) {
-                        case 1 -> {
-                            System.out.println("Enter your details to register");
+                        case 1 -> { 
+                            System.out.println("Enter your details to register as a Buyer");
                             String userName = InputCatcher.getString("Username: ");
                             String personName = InputCatcher.getString("Person Name: ");
+                            
                             file.registerUser(userName, personName, "Customer");
                             file.saveBuyerData();
-                            System.out.println("Registration successful! You can now login.");
+                            System.out.println("Buyer registration successful! You can now login.");
                         }
 
-                        case 2 -> {
+                        case 2 -> { 
                             System.out.println("Enter your username to login");
                             String userName = InputCatcher.getString("Username: ");
                             User loggedInUser = file.loginUser(userName);
+
                             if (loggedInUser != null && loggedInUser.isCustomer()) {
                                 System.out.println("Login successful! Welcome, " + loggedInUser.getPersonName());
-                                buyerDashBoard(loggedInUser);
+                                buyerDashBoard(loggedInUser); 
                             } else {
-                                System.out.println("Login failed! User not found or is not a buyer.");
+                                System.out.println("Login failed! User not found or is not registered as a buyer.");
                             }
                         }
 
-                        case 0 -> {
+                        case 0 -> { 
                             System.out.println("Returning to Main Dashboard...");
                             break;
                         }
@@ -750,7 +786,7 @@ public class ShopSystem {
                     }
                 }
 
-                case 2 -> {
+                case 2 -> { 
                     int subChoice;
                     System.out.println("\n=== Seller Dashboard ===");
                     System.out.println("[1] Register");
@@ -758,28 +794,30 @@ public class ShopSystem {
                     System.out.println("[0] Go back to Main Dashboard");
                     subChoice = InputCatcher.getInt("Choice: ");
                     switch (subChoice) {
-                        case 1 -> {
-                            System.out.println("Enter your details to register");
+                        case 1 -> { 
+                            System.out.println("Enter your details to register as a Seller");
                             String userName = InputCatcher.getString("Username: ");
                             String personName = InputCatcher.getString("Person Name: ");
+
                             file.registerUser(userName, personName, "Seller");
                             file.saveSellerData();
-                            System.out.println("Registration successful! You can now login.");
+                            System.out.println("Seller registration successful! You can now login.");
                         }
 
-                        case 2 -> {
+                        case 2 -> { 
                             System.out.println("Enter your username to login");
                             String userName = InputCatcher.getString("Username: ");
                             User loggedInUser = file.loginUser(userName);
+                            
                             if (loggedInUser != null && loggedInUser.isSeller()) {
                                 System.out.println("Login successful! Welcome, " + loggedInUser.getPersonName());
-                                sellerDashBoard(loggedInUser); // Pass the whole User object
+                                sellerDashBoard(loggedInUser); 
                             } else {
-                                System.out.println("Login failed! User not found or is not a seller.");
+                                System.out.println("Login failed! User not found or is not registered as a seller.");
                             }
                         }
 
-                        case 0 -> {
+                        case 0 -> { 
                             System.out.println("Returning to Main Dashboard...");
                             break;
                         }
@@ -790,12 +828,12 @@ public class ShopSystem {
             }
         } while (choice != 0);
 
-        file.saveAllData();
+        file.saveAllData(); 
         System.out.println("Exiting program. Goodbye!");
     }
 
 
-    public void sellerDashBoard(User seller) {
+    public void sellerDashBoard(User seller) { 
         StoreList storeList = new StoreList(file.getProducts());
         int choice;
         do {
@@ -811,19 +849,19 @@ public class ShopSystem {
             choice = InputCatcher.getInt("Choice: ");
 
             switch (choice) {
-                case 1 -> {
+                case 1 -> { 
                     System.out.println("Enter new product details:");
                     String name = InputCatcher.getString("Product Name: ");
                     double price = InputCatcher.getFloat("Product Price: ");
                     int stock = InputCatcher.getInt("Product Stock: ");
                     Product newProduct = new Product(name, price, stock, seller.getUserName());
                     storeList.addProduct(newProduct);
-                    file.saveProduct(); // Save changes
+                    file.saveProduct(); 
                     System.out.println("Product added successfully! ID: " + newProduct.getProductId());
                 }
 
-                case 2 -> {
-                    storeList.showStore(seller);
+                case 2 -> { 
+                    storeList.showStore(seller); 
                     int id = InputCatcher.getInt("Enter Product ID to update name: ");
                     Product p = file.findProductByID(id);
                     if (p != null && p.getSellerName().equals(seller.getUserName()) && !p.isDeleted()) {
@@ -836,7 +874,7 @@ public class ShopSystem {
                     }
                 }
 
-                case 3 -> {
+                case 3 -> { 
                     storeList.showStore(seller);
                     int id = InputCatcher.getInt("Enter Product ID to update price: ");
                     Product p = file.findProductByID(id);
@@ -850,7 +888,7 @@ public class ShopSystem {
                     }
                 }
 
-                case 4 -> {
+                case 4 -> { 
                     storeList.showStore(seller);
                     int id = InputCatcher.getInt("Enter Product ID to update stock: ");
                     Product p = file.findProductByID(id);
@@ -864,12 +902,12 @@ public class ShopSystem {
                     }
                 }
 
-                case 5 -> {
+                case 5 -> { 
                     storeList.showStore(seller);
                     int id = InputCatcher.getInt("Enter Product ID to remove: ");
                     Product p = file.findProductByID(id);
                     if (p != null && p.getSellerName().equals(seller.getUserName()) && !p.isDeleted()) {
-                        p.delProduct();
+                        p.delProduct(); 
                         file.saveProduct();
                         System.out.println("Product removed.");
                     } else {
@@ -877,20 +915,20 @@ public class ShopSystem {
                     }
                 }
                 
-                case 8 -> {
+                case 8 -> { 
                     System.out.println("\n--- Your Products ---");
                     storeList.showStore(seller);
                 }
 
-                case 9 -> {
+                case 9 -> { 
                     System.out.println("Returning to main dashboard...");
-                    return;
+                    return; 
                 }
 
-                case 0 -> {
+                case 0 -> { 
                     System.out.println("Exiting program. Goodbye!");
-                    file.saveAllData();
-                    System.exit(0);
+                    file.saveAllData(); 
+                    System.exit(0); 
                 }
 
                 default -> System.out.println("Invalid choice. Please try again.");
@@ -898,10 +936,49 @@ public class ShopSystem {
         } while (true);
     }
 
+    private void saveCartToUser(User buyer, CartList cart) {
+        if (buyer.isCustomer()) {
+            User.CustomerData data = buyer.getCustomerData();
+            data.clearCart();
+            
+            for (Product p : cart.getCartItems()) {
+                data.addToCart(p.getProductId(), p.getProductQuantity());
+            }
+        }
+    }
+
     public void buyerDashBoard(User buyer) {
         ProductList allProducts = new ProductList();
         allProducts.products = file.getProducts();
         CartList myCart = new CartList(file.getProducts());
+
+        System.out.println("Loading your saved cart...");
+        Map<Integer, Integer> savedCart = buyer.getCustomerData().getCart();
+        List<Integer> idsToRemove = new ArrayList<>(); 
+        
+        for (Map.Entry<Integer, Integer> entry : savedCart.entrySet()) {
+            int productId = entry.getKey();
+            int quantity = entry.getValue();
+            Product p = file.findProductByID(productId);
+            
+            if (p != null && !p.isDeleted() && p.getProductQuantity() > 0) {
+                if (quantity > p.getProductQuantity()) {
+                    System.out.println("Note: Quantity for '" + p.getProductName() + 
+                                       "' reduced to " + p.getProductQuantity() + " (max stock).");
+                    quantity = p.getProductQuantity(); 
+                    entry.setValue(quantity); 
+                }
+                myCart.addToCart(productId, quantity); 
+            } else {
+                idsToRemove.add(productId);
+            }
+        }
+        
+        for (int id : idsToRemove) {
+            savedCart.remove(id);
+            System.out.println("Note: An item from your saved cart is no longer available and has been removed.");
+        }
+
         int choice;
         do {
             System.out.println("\n=== Buyer Dashboard for " + buyer.getPersonName() + " ===");
@@ -912,16 +989,19 @@ public class ShopSystem {
             choice = InputCatcher.getInt("Choice: ");
 
             switch (choice) {
-                case 1 -> {
+                case 1 -> { 
                     System.out.println("\n--- All Products ---");
                     allProducts.showAll();
                     String buyChoice = InputCatcher.getString("Enter Product ID to buy (or 'M' to return to menu): ");
+                    
                     if (buyChoice.equalsIgnoreCase("M")) {
-                        break;
+                        break; 
                     }
+                    
                     try {
                         int id = Integer.parseInt(buyChoice);
                         Product p = file.findProductByID(id);
+                        
                         if (p != null && !p.isDeleted()) {
                             int qty = InputCatcher.getInt("Enter quantity: ");
                             if (qty > 0 && qty <= p.getProductQuantity()) {
@@ -938,11 +1018,11 @@ public class ShopSystem {
                     }
                 }
 
-                case 2 -> {
+                case 2 -> { 
                     System.out.println("\n--- Your Cart ---");
                     myCart.showAll();
                     if (myCart.isEmpty()) {
-                        break;
+                        break; 
                     }
                     
                     double total = 0;
@@ -954,7 +1034,7 @@ public class ShopSystem {
                     String checkoutChoice = InputCatcher.getString("Proceed to checkout? (y/n): ");
                     if (checkoutChoice.equalsIgnoreCase("y")) {
                         boolean stockError = false;
-                        //check if all items are still in stock
+                        
                         for (Product p_cart : myCart.getCartItems()) {
                             Product p_store = file.findProductByID(p_cart.getProductId());
                             if (p_store == null || p_store.isDeleted() || p_cart.getProductQuantity() > p_store.getProductQuantity()) {
@@ -964,14 +1044,17 @@ public class ShopSystem {
                         }
 
                         if (!stockError) {
-                            // If all items are in stock, proceed with purchase
                             for (Product p_cart : myCart.getCartItems()) {
                                 Product p_store = file.findProductByID(p_cart.getProductId());
                                 int newStock = p_store.getProductQuantity() - p_cart.getProductQuantity();
                                 p_store.updQty(newStock);
                             }
-                            file.saveProduct();
-                            myCart.clearCart();
+                            file.saveProduct(); 
+                            myCart.clearCart(); 
+                            
+                            saveCartToUser(buyer, myCart);
+                            file.saveCartData(); 
+
                             System.out.println("Checkout successful! Thank you for your purchase.");
                         } else {
                             System.out.println("Checkout failed. Please review your cart.");
@@ -979,22 +1062,26 @@ public class ShopSystem {
                     }
                 }
 
-                case 9 -> {
-                    System.out.println("Returning to main dashboard...");
-                    return;
+                case 9 -> { 
+                    System.out.println("Returning to main dashboard... Saving cart...");
+                    saveCartToUser(buyer, myCart);
+                    file.saveCartData(); 
+                    return; 
                 }
 
-                case 0 -> {
-                    System.out.println("Exiting program. Goodbye!");
-                    file.saveAllData(); // MUST DON'T REMOVE!!
-                    System.exit(0);
+                case 0 -> { 
+                    System.out.println("Exiting program... Saving cart... Goodbye!");
+                    saveCartToUser(buyer, myCart);
+                    file.saveAllData(); 
+                    System.exit(0); 
                 }
 
                 default -> System.out.println("Invalid choice. Please try again.");
             }
         } while (true);
     }
-}</textarea>
+}
+        </textarea>
 
     </div>
 
@@ -1023,8 +1110,23 @@ public class ShopSystem {
                         .then(() => {
                             // --- Give user feedback ---
                             const originalText = button.textContent;
+                            
+                            // Reset other buttons
+                            copyButtons.forEach(btn => {
+                                if (btn.classList.contains('copied')) {
+                                    btn.textContent = btn.dataset.originalText || btn.textContent;
+                                    btn.classList.remove('copied');
+                                }
+                                // Store original text if not already stored
+                                if (!btn.dataset.originalText) {
+                                    btn.dataset.originalText = btn.textContent;
+                                }
+                            });
+
+                            // Set this button to 'Copied!'
                             button.textContent = 'Copied!';
                             button.classList.add('copied');
+                            button.dataset.originalText = originalText; // Store its original text
 
                             // Change it back after 2 seconds
                             setTimeout(() => {
@@ -1034,6 +1136,7 @@ public class ShopSystem {
                         })
                         .catch(err => {
                             console.error('Failed to copy text: ', err);
+                            const originalText = button.dataset.originalText || button.textContent;
                             button.textContent = 'Copy Failed!';
                             setTimeout(() => {
                                 button.textContent = originalText;
